@@ -1,0 +1,31 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="roseGradient">
+      <stop offset="0%" stop-color="#ff8080" />
+      <stop offset="50%" stop-color="#ff0000" />
+      <stop offset="100%" stop-color="#ff8080" />
+    </linearGradient>
+  </defs>
+
+  <!-- Rose Petals -->
+  <path d="M100,100 L120,110 A20,20 0 0 1 140,100 A20,20 0 0 1 120,90 L100,100 Z" fill="url(#roseGradient)" />
+  <path d="M100,100 L110,120 A20,20 0 0 1 100,140 A20,20 0 0 1 90,120 L100,100 Z" fill="url(#roseGradient)" />
+  <path d="M100,100 L80,110 A20,20 0 0 1 60,100 A20,20 0 0 1 80,90 L100,100 Z" fill="url(#roseGradient)" />
+  <path d="M100,100 L90,120 A20,20 0 0 1 100,140 A20,20 0 0 1 110,120 L100,100 Z" fill="url(#roseGradient)" />
+  <path d="M100,100 L120,130 A20,20 0 0 1 140,120 A20,20 0 0 1 120,110 L100,100 Z" fill="url(#roseGradient)" />
+  <path d="M100,100 L110,140 A20,20 0 0 1 100,160 A20,20 0 0 1 90,140 L100,100 Z" fill="url(#roseGradient)" />
+  <path d="M100,100 L80,130 A20,20 0 0 1 60,120 A20,20 0 0 1 80,110 L100,100 Z" fill="url(#roseGradient)" />
+  <path d="M100,100 L90,140 A20,20 0 0 1 100,160 A20,20 0 0 1 110,140 L100,100 Z" fill="url(#roseGradient)" />
+  <path d="M100,100 L110,150 A15,15 0 0 1 100,165 A15,15 0 0 1 90,150 L100,100 Z" fill="url(#roseGradient)" />
+  <path d="M100,100 L90,150 A15,15 0 0 1 100,165 A15,15 0 0 1 110,150 L100,100 Z" fill="url(#roseGradient)" />
+  <path d="M100,100 L100,150 A10,10 0 0 1 100,160 A10,10 0 0 1 100,150 L100,100 Z" fill="url(#roseGradient)" />
+
+  <!-- Rose Center -->
+  <circle cx="100" cy="100" r="10" fill="#ff0000" />
+
+  <!-- Stem and Leaves -->
+  <path d="M100,180 L100,100" stroke="#339933" stroke-width="3" stroke-linecap="round" />
+  <path d="M80,120 L90,110 L90,130 Z" fill="#339933" />
+  <path d="M120,120 L110,110 L110,130 Z" fill="#339933" />
+
+</svg>

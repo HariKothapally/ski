@@ -1,19 +1,14 @@
-import { useState } from "react";
-import "./App.css";
+// src/App.jsx
+import { Link } from "react-router-dom";
 
-function App() {
-  const [count, setCount] = useState(0);
-
+const App = () => {
   return (
-    <>
-      <h1>SKI - Get Ready</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-      </div>
-    </>
+    <div>
+      <h1>App</h1>
+      <Link to="/register">Register</Link>
+      <Link to="/login">Login</Link>
+    </div>
   );
-}
+};
 
 export default App;

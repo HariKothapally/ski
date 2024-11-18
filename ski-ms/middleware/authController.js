@@ -21,6 +21,10 @@ export function generateToken(username) {
 
 // Verify a JWT token
 export function verifyToken(token) {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is required to verify token");
+  }
+  const SECRET_KEY = process.env.JWT_SECRET;
   return new Promise((resolve, reject) => {
     jwt.verify(token, SECRET_KEY, (err, decoded) => {
       if (err) {
@@ -58,17 +62,19 @@ export async function login(req, res) {
 }
 
 // Access protected route
-export async function protectedRoute(req, res) {
-  const token = req.headers["authorization"];
+export async function protectedRoute(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
-  if (token) {
-    try {
-      verifyToken(token);
-      res.send("This is a protected route");
-    } catch (err) {
-      res.status(401).send("Invalid token");
-    }
-  } else {
-    res.status(401).send("Token is required");
+  if (!token) {
+    return res.status(401).json({ message: "Token is required" });
+  }
+
+  try {
+    const decoded = await verifyToken(token);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid token" });
   }
 }

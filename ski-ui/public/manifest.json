@@ -1,0 +1,19 @@
+{
+  "short_name": "Ski App",
+  "name": "Ski Resort Management",
+  "icons": [
+    {
+      "src": "ski.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "scope": "/",
+  "description": "Ski Resort Management Application"
+}

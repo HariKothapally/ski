@@ -1,31 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="roseGradient">
-      <stop offset="0%" stop-color="#ff8080" />
-      <stop offset="50%" stop-color="#ff0000" />
-      <stop offset="100%" stop-color="#ff8080" />
-    </linearGradient>
-  </defs>
-
-  <!-- Rose Petals -->
-  <path d="M100,100 L120,110 A20,20 0 0 1 140,100 A20,20 0 0 1 120,90 L100,100 Z" fill="url(#roseGradient)" />
-  <path d="M100,100 L110,120 A20,20 0 0 1 100,140 A20,20 0 0 1 90,120 L100,100 Z" fill="url(#roseGradient)" />
-  <path d="M100,100 L80,110 A20,20 0 0 1 60,100 A20,20 0 0 1 80,90 L100,100 Z" fill="url(#roseGradient)" />
-  <path d="M100,100 L90,120 A20,20 0 0 1 100,140 A20,20 0 0 1 110,120 L100,100 Z" fill="url(#roseGradient)" />
-  <path d="M100,100 L120,130 A20,20 0 0 1 140,120 A20,20 0 0 1 120,110 L100,100 Z" fill="url(#roseGradient)" />
-  <path d="M100,100 L110,140 A20,20 0 0 1 100,160 A20,20 0 0 1 90,140 L100,100 Z" fill="url(#roseGradient)" />
-  <path d="M100,100 L80,130 A20,20 0 0 1 60,120 A20,20 0 0 1 80,110 L100,100 Z" fill="url(#roseGradient)" />
-  <path d="M100,100 L90,140 A20,20 0 0 1 100,160 A20,20 0 0 1 110,140 L100,100 Z" fill="url(#roseGradient)" />
-  <path d="M100,100 L110,150 A15,15 0 0 1 100,165 A15,15 0 0 1 90,150 L100,100 Z" fill="url(#roseGradient)" />
-  <path d="M100,100 L90,150 A15,15 0 0 1 100,165 A15,15 0 0 1 110,150 L100,100 Z" fill="url(#roseGradient)" />
-  <path d="M100,100 L100,150 A10,10 0 0 1 100,160 A10,10 0 0 1 100,150 L100,100 Z" fill="url(#roseGradient)" />
-
-  <!-- Rose Center -->
-  <circle cx="100" cy="100" r="10" fill="#ff0000" />
-
-  <!-- Stem and Leaves -->
-  <path d="M100,180 L100,100" stroke="#339933" stroke-width="3" stroke-linecap="round" />
-  <path d="M80,120 L90,110 L90,130 Z" fill="#339933" />
-  <path d="M120,120 L110,110 L110,130 Z" fill="#339933" />
-
+    <defs>
+        <!-- Gradient for petals -->
+        <linearGradient id="petalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ff3333;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#cc0000;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#ff3333;stop-opacity:1" />
+        </linearGradient>
+        
+        <!-- Gradient for center -->
+        <radialGradient id="centerGradient">
+            <stop offset="0%" style="stop-color:#fff44f;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#ffd700;stop-opacity:1" />
+        </radialGradient>
+        
+        <!-- Gradient for leaves -->
+        <linearGradient id="leafGradient">
+            <stop offset="0%" style="stop-color:#32cd32;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#228b22;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    <!-- Main flower group -->
+    <g transform="translate(100,90) scale(0.5)">
+        <!-- Petals -->
+        <g>
+            <!-- Row 1 petals (10 petals) -->
+            <path d="M0,0 Q 50,-50 100,-20 Q 120,0 100,20 Q 50,50 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(0)"/>
+            <path d="M0,0 Q 50,-50 100,-20 Q 120,0 100,20 Q 50,50 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(36)"/>
+            <path d="M0,0 Q 50,-50 100,-20 Q 120,0 100,20 Q 50,50 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(72)"/>
+            <path d="M0,0 Q 50,-50 100,-20 Q 120,0 100,20 Q 50,50 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(108)"/>
+            <path d="M0,0 Q 50,-50 100,-20 Q 120,0 100,20 Q 50,50 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(144)"/>
+            <path d="M0,0 Q 50,-50 100,-20 Q 120,0 100,20 Q 50,50 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(180)"/>
+            <path d="M0,0 Q 50,-50 100,-20 Q 120,0 100,20 Q 50,50 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(216)"/>
+            <path d="M0,0 Q 50,-50 100,-20 Q 120,0 100,20 Q 50,50 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(252)"/>
+            <path d="M0,0 Q 50,-50 100,-20 Q 120,0 100,20 Q 50,50 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(288)"/>
+            <path d="M0,0 Q 50,-50 100,-20 Q 120,0 100,20 Q 50,50 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(324)"/>
+            
+            <!-- Row 2 petals (10 petals) -->
+            <path d="M0,0 Q 30,-30 60,-12 Q 72,0 60,12 Q 30,30 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(18)"/>
+            <path d="M0,0 Q 30,-30 60,-12 Q 72,0 60,12 Q 30,30 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(54)"/>
+            <path d="M0,0 Q 30,-30 60,-12 Q 72,0 60,12 Q 30,30 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(90)"/>
+            <path d="M0,0 Q 30,-30 60,-12 Q 72,0 60,12 Q 30,30 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(126)"/>
+            <path d="M0,0 Q 30,-30 60,-12 Q 72,0 60,12 Q 30,30 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(162)"/>
+            <path d="M0,0 Q 30,-30 60,-12 Q 72,0 60,12 Q 30,30 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(198)"/>
+            <path d="M0,0 Q 30,-30 60,-12 Q 72,0 60,12 Q 30,30 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(234)"/>
+            <path d="M0,0 Q 30,-30 60,-12 Q 72,0 60,12 Q 30,30 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(270)"/>
+            <path d="M0,0 Q 30,-30 60,-12 Q 72,0 60,12 Q 30,30 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(306)"/>
+            <path d="M0,0 Q 30,-30 60,-12 Q 72,0 60,12 Q 30,30 0,0" 
+                  fill="url(#petalGradient)" transform="rotate(342)"/>
+        </g>
+        <!-- Flower center -->
+        <circle cx="0" cy="0" r="30" fill="url(#centerGradient)"/>
+        
+        <!-- Detail dots in center -->
+        <g fill="#1e90ff">
+            <circle cx="-10" cy="-10" r="3"/>
+            <circle cx="10" cy="-10" r="3"/>
+            <circle cx="0" cy="0" r="3"/>
+            <circle cx="-10" cy="10" r="3"/>
+            <circle cx="10" cy="10" r="3"/>
+        </g>
+    </g>
+    <!-- Stem -->
+    <path d="M100,90 L100,160" 
+          stroke="url(#leafGradient)" 
+          stroke-width="6" 
+          stroke-linecap="round"/>
+    <!-- Single Leaf -->
+    <path d="M100,120 Q130,110 140,120 Q130,130 100,120" 
+          fill="url(#leafGradient)"/>
 </svg>

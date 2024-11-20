@@ -4,10 +4,30 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/ski.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="description" content="Ski Resort Management Application" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="apple-mobile-web-app-title" content="Ski App" />
+        <link rel="apple-touch-icon" href="/ski.svg" />
         <title>SKI</title>
     </head>
     <body>
         <div id="root"></div>
         <script type="module" src="/src/main.jsx"></script>
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/serviceWorker.js')
+                        .then(registration => {
+                            console.log('ServiceWorker registration successful');
+                        })
+                        .catch(err => {
+                            console.log('ServiceWorker registration failed: ', err);
+                        });
+                });
+            }
+        </script>
     </body>
 </html>

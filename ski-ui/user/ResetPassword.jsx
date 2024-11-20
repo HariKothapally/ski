@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 
-const LoginForm = () => {
+const ResetPassword = () => {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    login: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
+  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const token = searchParams.get('token');
+
+  useEffect(() => {
+    if (!token) {
+      setError('No reset token provided');
+    }
+  }, [token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,46 +36,43 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+
     setLoading(true);
     setError('');
+    setMessage('');
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`, formData);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/reset-password`, {
+        token,
+        newPassword: formData.password
+      });
 
-      if (response.data.success && response.data.data) {
-        const userInfo = {
-          username: response.data.data.username,
-          id: response.data.data.id,
-          role: response.data.data.role,
-          email: response.data.data.email,
-          firstName: response.data.data.firstName,
-          lastName: response.data.data.lastName,
-          employeeID: response.data.data.employeeID
-        };
-
-        localStorage.setItem('authToken', response.data.data.token);
-        localStorage.setItem('userInfo', JSON.stringify(userInfo));
-
-        console.log(`Welcome ${userInfo.firstName} ${userInfo.lastName} (${userInfo.role})`);
-
-        if (userInfo.role === 'admin') {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/dashboard');
-        }
+      if (response.data.success) {
+        setMessage(response.data.message);
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
       }
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Login failed. Please check your credentials.';
-      setError(errorMessage);
-      console.error('Login error:', errorMessage);
+      setError(err.response?.data?.message || 'An error occurred while resetting your password.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center py-5" 
-         style={{ 
+    <div className="min-vh-100 d-flex align-items-center justify-content-center py-5"
+         style={{
            background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
            minHeight: '100vh'
          }}>
@@ -74,10 +80,10 @@ const LoginForm = () => {
         <div className="row justify-content-center">
           <div className="col-md-5">
             <div className="text-center mb-4">
-              <h1 className="fw-bold text-primary mb-2">Ski-MS</h1>
-              <p className="text-muted">Welcome back! Please login to your account.</p>
+              <h1 className="fw-bold text-primary mb-2">Create New Password</h1>
+              <p className="text-muted">Enter your new password below</p>
             </div>
-            
+
             <div className="card shadow-lg border-0 rounded-lg">
               <div className="card-body p-5">
                 {error && (
@@ -87,38 +93,23 @@ const LoginForm = () => {
                   </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="needs-validation">
-                  <div className="mb-4">
-                    <label htmlFor="login" className="form-label small fw-bold">
-                      Username or Email
-                    </label>
-                    <div className="input-group input-group-lg">
-                      <span className="input-group-text bg-light border-end-0">
-                        <i className="bi bi-person text-primary"></i>
-                      </span>
-                      <input
-                        type="text"
-                        className="form-control border-start-0 bg-light"
-                        id="login"
-                        name="login"
-                        value={formData.login}
-                        onChange={handleChange}
-                        placeholder="Enter your username or email"
-                        required
-                        autoComplete="username"
-                      />
+                {message && (
+                  <div className="alert alert-success d-flex align-items-center" role="alert">
+                    <i className="bi bi-check-circle-fill me-2"></i>
+                    <div>
+                      {message}
+                      <div className="small mt-1">
+                        Redirecting to login page...
+                      </div>
                     </div>
                   </div>
+                )}
 
+                <form onSubmit={handleSubmit} className="needs-validation">
                   <div className="mb-4">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <label htmlFor="password" className="form-label small fw-bold">
-                        Password
-                      </label>
-                      <Link to="/forgot-password" className="text-primary text-decoration-none small">
-                        Forgot Password?
-                      </Link>
-                    </div>
+                    <label htmlFor="password" className="form-label small fw-bold">
+                      New Password
+                    </label>
                     <div className="input-group input-group-lg">
                       <span className="input-group-text bg-light border-end-0">
                         <i className="bi bi-lock text-primary"></i>
@@ -130,9 +121,37 @@ const LoginForm = () => {
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
-                        placeholder="Enter your password"
+                        placeholder="Enter your new password"
                         required
-                        autoComplete="current-password"
+                        minLength="8"
+                      />
+                      <button
+                        className="input-group-text bg-light border-start-0"
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                      >
+                        <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} text-primary`}></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <label htmlFor="confirmPassword" className="form-label small fw-bold">
+                      Confirm New Password
+                    </label>
+                    <div className="input-group input-group-lg">
+                      <span className="input-group-text bg-light border-end-0">
+                        <i className="bi bi-lock-fill text-primary"></i>
+                      </span>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        className="form-control border-start-0 border-end-0 bg-light"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        placeholder="Confirm your new password"
+                        required
                       />
                       <button
                         className="input-group-text bg-light border-start-0"
@@ -145,20 +164,20 @@ const LoginForm = () => {
                   </div>
 
                   <div className="d-grid mb-4">
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       className="btn btn-primary btn-lg"
-                      disabled={loading}
+                      disabled={loading || !token}
                     >
                       {loading ? (
                         <div className="d-flex align-items-center justify-content-center">
                           <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          <span>Signing in...</span>
+                          <span>Resetting Password...</span>
                         </div>
                       ) : (
                         <div className="d-flex align-items-center justify-content-center">
-                          <i className="bi bi-box-arrow-in-right me-2"></i>
-                          <span>Sign In</span>
+                          <i className="bi bi-check-lg me-2"></i>
+                          <span>Reset Password</span>
                         </div>
                       )}
                     </button>
@@ -166,9 +185,9 @@ const LoginForm = () => {
 
                   <div className="text-center">
                     <p className="text-muted mb-0">
-                      Don't have an account?{' '}
-                      <Link to="/register" className="text-primary fw-bold text-decoration-none">
-                        Create Account
+                      Remember your password?{' '}
+                      <Link to="/login" className="text-primary fw-bold text-decoration-none">
+                        Back to Login
                       </Link>
                     </p>
                   </div>
@@ -178,7 +197,7 @@ const LoginForm = () => {
 
             <div className="text-center mt-4">
               <small className="text-muted">
-                &copy; {new Date().getFullYear()} Ski-MS. All rights reserved.
+                © {new Date().getFullYear()} Ski-MS. All rights reserved.
               </small>
             </div>
           </div>
@@ -188,4 +207,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default ResetPassword;

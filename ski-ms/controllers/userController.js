@@ -1,136 +1,172 @@
 import User from "../models/userModel.js";
-import jwt from "jsonwebtoken";
 import Employee from "../models/employeeModel.js";
 import mongoose from "mongoose";
 import { randomBytes } from 'crypto';
+import { generateToken, hashPassword, comparePassword } from '../utils/auth.js';
+import { validateEmail, validatePassword, sanitizeInput } from '../utils/validation.js';
+import { AppError } from '../utils/errorHandler.js';
+import { catchAsync } from '../utils/errorHandler.js';
 
-// Helper function to generate JWT token
-const generateToken = (user, employeeID) => {
-  return jwt.sign(
-    { 
-      id: user._id,
-      username: user.username,
-      firstName: user.firstName,
-      role: user.role,
-      email: user.email,
-      employeeID: employeeID
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: '24h' }
-  );
+const validateUserInput = (data, isUpdate = false) => {
+  const { username, password, email, firstName, lastName, employeeId } = data;
+
+  if (!isUpdate) {
+    if (!username || typeof username !== 'string' || username.trim().length < 3) {
+      throw new AppError('Username must be at least 3 characters long', 400);
+    }
+
+    if (!password || !validatePassword(password)) {
+      throw new AppError('Password must be at least 8 characters long and contain uppercase, lowercase, and numbers', 400);
+    }
+
+    if (!email || !validateEmail(email)) {
+      throw new AppError('Invalid email format', 400);
+    }
+  } else {
+    if (username && (typeof username !== 'string' || username.trim().length < 3)) {
+      throw new AppError('Username must be at least 3 characters long', 400);
+    }
+
+    if (password && !validatePassword(password)) {
+      throw new AppError('Password must be at least 8 characters long and contain uppercase, lowercase, and numbers', 400);
+    }
+
+    if (email && !validateEmail(email)) {
+      throw new AppError('Invalid email format', 400);
+    }
+  }
+
+  if (!firstName || typeof firstName !== 'string' || firstName.trim().length === 0) {
+    throw new AppError('First name is required', 400);
+  }
+
+  if (!lastName || typeof lastName !== 'string' || lastName.trim().length === 0) {
+    throw new AppError('Last name is required', 400);
+  }
+
+  if (!employeeId) {
+    throw new AppError('Employee ID is required', 400);
+  }
+
+  return {
+    ...(username && { username: sanitizeInput(username) }),
+    ...(email && { email: email.toLowerCase() }),
+    firstName: sanitizeInput(firstName),
+    lastName: sanitizeInput(lastName),
+    employeeId
+  };
 };
 
 // Find user by username or email
-const findUserByUsernameOrEmail = async (login) => {
-  try {
-    return await User.findOne({
-      $or: [
-        { username: login },
-        { email: login.toLowerCase() }
-      ]
-    });
-  } catch (error) {
-    throw error;
-  }
-};
+const findUserByUsernameOrEmail = catchAsync(async (login) => {
+  return await User.findOne({
+    $or: [
+      { username: login },
+      { email: login.toLowerCase() }
+    ]
+  });
+});
 
 // Register a new user
-const registerUser = async (req, res) => {
-  const { username, password, email, firstName, lastName, employeeId } = req.body;
+export const registerUser = catchAsync(async (req, res) => {
+  const validatedData = validateUserInput(req.body);
+  const { password } = req.body;
 
-  try {
-    // Check if user already exists
-    const userExists = await User.findOne({
-      $or: [{ username }, { email }]
-    });
+  // Check if user already exists
+  const userExists = await User.findOne({
+    $or: [
+      { username: validatedData.username },
+      { email: validatedData.email }
+    ]
+  });
 
-    if (userExists) {
-      return res.status(400).json({ 
-        success: false,
-        message: userExists.username === username ? 
-          `Username '${username}' is already taken` : 
-          `Email '${email}' is already registered`
-      });
-    }
-
-    // Find employee and check if they can have a user account
-    const employee = await Employee.findOne({ employeeID: employeeId });
-    
-    if (!employee) {
-      return res.status(400).json({ 
-        success: false,
-        message: `Invalid employee ID: ${employeeId}`
-      });
-    }
-
-    if (employee.hasUser) {
-      return res.status(400).json({ 
-        success: false,
-        message: "This employee already has a user account"
-      });
-    }
-
-    // Create user with reference to employee
-    const user = await User.create({
-      username,
-      password,
-      email,
-      firstName,
-      lastName,
-      employeeId: employee._id,
-      role: employee.role
-    });
-
-    // Update employee hasUser status
-    employee.hasUser = true;
-    await employee.save();
-
-    res.status(201).json({
-      success: true,
-      message: `User account created successfully for ${firstName} ${lastName} (${email})`
-    });
-  } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: "Registration failed. Please try again later."
-    });
+  if (userExists) {
+    throw new AppError(
+      userExists.username === validatedData.username ? 
+      `Username '${validatedData.username}' is already taken` : 
+      `Email '${validatedData.email}' is already registered`,
+      400
+    );
   }
-};
+
+  // Find employee and check if they can have a user account
+  const employee = await Employee.findOne({ employeeID: validatedData.employeeId });
+  
+  if (!employee) {
+    throw new AppError(`Invalid employee ID: ${validatedData.employeeId}`, 400);
+  }
+
+  if (employee.hasUser) {
+    throw new AppError("This employee already has a user account", 400);
+  }
+
+  // Hash password
+  const hashedPassword = await hashPassword(password);
+
+  // Create user with reference to employee
+  const user = await User.create({
+    ...validatedData,
+    password: hashedPassword,
+    employeeId: employee._id,
+    role: employee.role,
+    created_at: new Date()
+  });
+
+  // Update employee hasUser status
+  employee.hasUser = true;
+  await employee.save();
+
+  const token = generateToken(user, employee.employeeID);
+
+  res.status(201).json({
+    success: true,
+    token,
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      employeeID: employee.employeeID
+    }
+  });
+});
 
 // Login user
-const loginUser = async (req, res) => {
+export const loginUser = catchAsync(async (req, res) => {
   const { login, password } = req.body;
 
-  try {
-    console.log('Login attempt for:', login);
-    const user = await findUserByUsernameOrEmail(login);
-    
-    if (!user) {
-      console.log('User not found');
-      return res.status(401).json({ message: "Invalid username/email or password" });
-    }
+  if (!login || !password) {
+    throw new AppError('Please provide login credentials', 400);
+  }
 
-    console.log('User found:', user.username);
-    const isValidPassword = await user.comparePassword(password);
-    console.log('Password valid:', isValidPassword);
+  const user = await findUserByUsernameOrEmail(login);
+  
+  if (!user) {
+    throw new AppError('Invalid login credentials', 401);
+  }
 
-    if (!isValidPassword) {
-      return res.status(401).json({ message: "Invalid username/email or password" });
-    }
+  const isMatch = await comparePassword(password, user.password);
 
-    // Update last login
-    user.lastLogin = new Date();
-    await user.save();
+  if (!isMatch) {
+    throw new AppError('Invalid login credentials', 401);
+  }
 
-    // Populate employee details to get employeeID
-    await user.populate('employeeId');
-    const employeeID = user.employeeId.employeeID;
+  // Update last login
+  user.lastLogin = new Date();
+  await user.save();
 
-    const token = generateToken(user, employeeID);
+  // Populate employee details to get employeeID
+  await user.populate('employeeId');
+  const employeeID = user.employeeId.employeeID;
 
-    res.json({
-      token,
+  const token = generateToken(user, employeeID);
+
+  res.json({
+    success: true,
+    token,
+    user: {
       id: user._id,
       username: user.username,
       email: user.email,
@@ -138,106 +174,116 @@ const loginUser = async (req, res) => {
       lastName: user.lastName,
       role: user.role,
       employeeID
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    const errorMessage = process.env.NODE_ENV === 'development' 
-      ? `Login failed: ${error.message}`
-      : "Login failed";
-    res.status(500).json({ message: errorMessage });
-  }
-};
+    }
+  });
+});
 
 // Get available employees for registration
-const getAvailableEmployees = async (req, res) => {
-  try {
-    const employees = await Employee.find({ hasUser: false });
-    res.json(employees);
-  } catch (error) {
-    console.error('Error fetching available employees:', error);
-    res.status(500).json({ message: "Failed to fetch available employees" });
+export const getAvailableEmployees = catchAsync(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 50;
+  const skip = (page - 1) * limit;
+
+  // Build filter object
+  let filter = { hasUser: false };
+  
+  if (req.query.search) {
+    const searchRegex = new RegExp(sanitizeInput(req.query.search), 'i');
+    filter.$or = [
+      { firstName: searchRegex },
+      { lastName: searchRegex },
+      { employeeID: searchRegex }
+    ];
   }
-};
+
+  if (req.query.role) {
+    filter.role = sanitizeInput(req.query.role);
+  }
+
+  const employees = await Employee.find(filter)
+    .sort({ firstName: 1, lastName: 1 })
+    .skip(skip)
+    .limit(limit)
+    .select('-__v');
+
+  const total = await Employee.countDocuments(filter);
+
+  res.json({
+    success: true,
+    data: {
+      employees,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    }
+  });
+});
 
 // Forgot password
-const forgotPassword = async (req, res) => {
-  try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
+export const forgotPassword = catchAsync(async (req, res) => {
+  const { email } = req.body;
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'No account found with this email address.'
-      });
-    }
-
-    // Generate a password reset token using built-in crypto
-    const resetToken = randomBytes(32).toString('hex');
-    const resetTokenExpiry = Date.now() + 3600000; // Token valid for 1 hour
-
-    // Save the reset token and expiry to the user document
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = resetTokenExpiry;
-    await user.save();
-
-    // In a production environment, you would send an email here
-    // For now, we'll just return the token in the response
-    return res.status(200).json({
-      success: true,
-      message: 'Password reset instructions have been sent to your email.',
-      resetToken // In production, remove this and send via email instead
-    });
-  } catch (error) {
-    console.error('Forgot password error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'An error occurred while processing your request.'
-    });
+  if (!email || !validateEmail(email)) {
+    throw new AppError('Please provide a valid email address', 400);
   }
-};
+
+  const user = await User.findOne({ email: email.toLowerCase() });
+
+  if (!user) {
+    throw new AppError('No account found with this email address', 404);
+  }
+
+  // Generate a password reset token
+  const resetToken = randomBytes(32).toString('hex');
+  const resetTokenExpiry = Date.now() + 3600000; // Token valid for 1 hour
+
+  // Save the reset token and expiry
+  user.resetPasswordToken = resetToken;
+  user.resetPasswordExpires = resetTokenExpiry;
+  await user.save();
+
+  // TODO: Send email with reset token
+  // For development, return token in response
+  res.status(200).json({
+    success: true,
+    message: 'Password reset instructions sent to your email',
+    resetToken // Remove this in production
+  });
+});
 
 // Reset password
-const resetPassword = async (req, res) => {
-  try {
-    const { token, newPassword } = req.body;
+export const resetPassword = catchAsync(async (req, res) => {
+  const { token, password } = req.body;
 
-    // Find user with valid reset token and token not expired
-    const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() }
-    });
-
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password reset token is invalid or has expired.'
-      });
-    }
-
-    // Set the new password and clear reset token fields
-    user.password = newPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
-    await user.save();
-
-    return res.status(200).json({
-      success: true,
-      message: 'Password has been reset successfully.'
-    });
-  } catch (error) {
-    console.error('Reset password error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'An error occurred while resetting your password.'
-    });
+  if (!token || !password) {
+    throw new AppError('Please provide reset token and new password', 400);
   }
-};
 
-export {
-  registerUser,
-  loginUser,
-  forgotPassword,
-  resetPassword,
-  getAvailableEmployees
-};
+  if (!validatePassword(password)) {
+    throw new AppError('Password must be at least 8 characters long and contain uppercase, lowercase, and numbers', 400);
+  }
+
+  const user = await User.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: Date.now() }
+  });
+
+  if (!user) {
+    throw new AppError('Invalid or expired reset token', 400);
+  }
+
+  // Update password and clear reset token
+  user.password = await hashPassword(password);
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  user.updated_at = new Date();
+  await user.save();
+
+  res.json({
+    success: true,
+    message: 'Password has been reset successfully'
+  });
+});

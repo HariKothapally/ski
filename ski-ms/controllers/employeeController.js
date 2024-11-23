@@ -45,7 +45,21 @@ export const getEmployees = async (req, res) => {
 // Get an employee by ID
 export const getEmployeeById = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id);
+    let employee;
+    const { id } = req.params;
+
+    // Try to find by employeeID first
+    employee = await Employee.findOne({ employeeID: id });
+
+    // If not found, try to find by MongoDB _id
+    if (!employee) {
+      try {
+        employee = await Employee.findById(id);
+      } catch (error) {
+        // Invalid MongoDB ID format, we can ignore this error
+      }
+    }
+
     if (!employee)
       return res.status(404).json({ message: "Employee not found" });
     res.status(200).json(employee);

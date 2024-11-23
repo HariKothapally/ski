@@ -1,27 +1,45 @@
-import jwt from 'jsonwebtoken';
+import { verifyToken } from '../utils/auth.js';
+import { AppError } from '../utils/errorHandler.js';
 
 export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
   if (!token) {
-    return res.status(401).json({ message: 'Authentication required' });
+    throw new AppError('Authentication required', 401);
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verifyToken(token);
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(403).json({ message: 'Invalid or expired token' });
+    throw new AppError('Invalid or expired token', 403);
   }
 };
 
 export const authorizeRole = (roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Insufficient permissions' });
+      throw new AppError('Insufficient permissions', 403);
     }
     next();
   };
+};
+
+export const errorHandler = (err, req, res, next) => {
+  console.error(err);
+  
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message
+    });
+  }
+
+  // Default to 500 server error
+  res.status(500).json({
+    success: false,
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+  });
 };

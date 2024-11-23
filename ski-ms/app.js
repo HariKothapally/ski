@@ -24,6 +24,7 @@ import imageRoutes from "./routes/imageRoutes.js";
 import purchaseRoutes from "./routes/purchaseRoutes.js";
 import menuRoutes from "./routes/menuRoutes.js";
 import mealTrackerRoutes from "./routes/mealTrackerRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 const app = express();
 
@@ -34,13 +35,16 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Connect to database
-await connectDB();
+if (process.env.NODE_ENV !== 'test') {
+  await connectDB();
+}
 
 // Define routes
 // Auth routes
 app.use("/api/auth", userRoutes);
 
 // Protected routes
+app.use("/api/dashboard", authenticateToken, dashboardRoutes);
 app.use("/api/employees", authenticateToken, employeeRoutes);
 app.use("/api/suppliers", authenticateToken, supplierRoutes);
 app.use("/api/ingredients", authenticateToken, ingredientRoutes);
@@ -51,7 +55,10 @@ app.use("/api/revenue", authenticateToken, revenueRoutes);
 app.use("/api/expenditure", authenticateToken, expenditureRoutes);
 app.use("/api/receipts", authenticateToken, receiptRoutes);
 app.use("/api/budgets", authenticateToken, budgetRoutes);
-app.use("/api/stockmovements", authenticateToken, stockMovementRoutes);
+
+// Stock Management routes
+app.use("/api/stock/movements", authenticateToken, stockMovementRoutes);
+
 app.use("/api/images", authenticateToken, imageRoutes);
 app.use("/api/purchases", authenticateToken, purchaseRoutes);
 app.use("/api/menus", authenticateToken, menuRoutes);
@@ -63,9 +70,16 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
-// Start the server
-const PORT = process.env.PORT || 3300;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+// Export app for testing
+export { app };
+
+// Start server if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
 // Shutdown hook to disconnect from the database
 process.on("SIGINT", async () => {

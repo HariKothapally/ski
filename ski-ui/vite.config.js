@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     port: mode === 'test' ? 5174 : 5173,
+    host: true, // Needed for Render
   },
   test: {
     environment: 'jsdom',
@@ -22,6 +23,7 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: (id) => {
@@ -65,7 +67,6 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: 'assets/[name]-[hash].js',
       },
     },
-    sourcemap: true,
     target: 'esnext',
   },
   define: {

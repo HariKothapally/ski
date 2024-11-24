@@ -1,116 +1,59 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const NavbarComponent = () => {
   const navigate = useNavigate();
-  const authToken = localStorage.getItem('authToken');
-  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-  const { role, username } = userInfo;
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userInfo');
+    logout();
     navigate('/login');
   };
 
-  const renderNavLinks = () => {
-    if (!authToken) return null;
-
-    const links = [];
-
-    // Common links for all authenticated users
-    links.push(
-      <li className="nav-item" key="expenditure">
-        <Link className="nav-link" to="/expenditure">
-          Expenditure Management
-        </Link>
-      </li>
-    );
-
-    // Admin-specific links
-    if (role === 'ADMIN') {
-      links.push(
-        <>
-          <li className="nav-item" key="admin">
-            <Link className="nav-link" to="/admin">
-              Admin Panel
-            </Link>
-          </li>
-          <li className="nav-item" key="hr">
-            <Link className="nav-link" to="/hr">
-              HR Management
-            </Link>
-          </li>
-        </>
-      );
-    }
-
-    // Manager-specific links
-    if (role === 'MANAGER' || role === 'ADMIN') {
-      links.push(
-        <li className="nav-item" key="reports">
-          <Link className="nav-link" to="/reports">
-            Reports
-          </Link>
-        </li>
-      );
-    }
-
-    return links;
-  };
-
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <div className="container">
-        <Link className="navbar-brand" to="/">
-          <i className="bi bi-house-door me-2"></i>
-          SKI Management System
-        </Link>
-        <button 
-          className="navbar-toggler" 
-          type="button" 
-          data-bs-toggle="collapse" 
-          data-bs-target="#navbarNav"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav me-auto">
-            {renderNavLinks()}
-          </ul>
-          <ul className="navbar-nav">
-            {!authToken ? (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/register">Register</Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/login">Login</Link>
-                </li>
-              </>
-            ) : (
-              <>
-                <li className="nav-item">
-                  <span className="nav-link">
-                    <i className="bi bi-person me-1"></i>
-                    {username} ({role})
-                  </span>
-                </li>
-                <li className="nav-item">
-                  <button 
-                    className="btn btn-outline-light ms-2" 
-                    onClick={handleLogout}
-                  >
-                    <i className="bi bi-box-arrow-right me-1"></i>
-                    Logout
-                  </button>
-                </li>
-              </>
-            )}
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <Navbar bg="light" expand="lg" className="mb-3">
+      <Container>
+        <Navbar.Brand href="/">Ski Management System</Navbar.Brand>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+          {user ? (
+            <>
+              <Nav className="me-auto">
+                <Nav.Link href="/dashboard">Dashboard</Nav.Link>
+                <NavDropdown title="Management" id="management-dropdown">
+                  <NavDropdown.Item href="/menu">Menu</NavDropdown.Item>
+                  <NavDropdown.Item href="/inventory">Inventory</NavDropdown.Item>
+                  <NavDropdown.Item href="/recipes">Recipes</NavDropdown.Item>
+                  <NavDropdown.Item href="/orders">Orders</NavDropdown.Item>
+                  <NavDropdown.Item href="/customers">Customers</NavDropdown.Item>
+                  <NavDropdown.Item href="/events">Events</NavDropdown.Item>
+                  <NavDropdown.Item href="/quality">Quality</NavDropdown.Item>
+                </NavDropdown>
+                <NavDropdown title="Finance" id="finance-dropdown">
+                  <NavDropdown.Item href="/budget">Budget</NavDropdown.Item>
+                  <NavDropdown.Item href="/revenue">Revenue</NavDropdown.Item>
+                </NavDropdown>
+                <Nav.Link href="/analytics">Analytics</Nav.Link>
+              </Nav>
+              <Nav>
+                <NavDropdown title={user.name || 'Profile'} id="profile-dropdown">
+                  <NavDropdown.Item href="/profile">Profile</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
+                </NavDropdown>
+              </Nav>
+            </>
+          ) : (
+            <Nav className="ms-auto">
+              <Nav.Link href="/login">Login</Nav.Link>
+              <Nav.Link href="/register">Register</Nav.Link>
+            </Nav>
+          )}
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
   );
 };
 

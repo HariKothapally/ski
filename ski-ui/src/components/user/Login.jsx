@@ -31,20 +31,20 @@ const LoginForm = () => {
     setError('');
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`, formData);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/login`, formData);
 
-      if (response.data.success && response.data.data) {
+      if (response.data && response.data.token) {
         const userInfo = {
-          username: response.data.data.username,
-          id: response.data.data.id,
-          role: response.data.data.role,
-          email: response.data.data.email,
-          firstName: response.data.data.firstName,
-          lastName: response.data.data.lastName,
-          employeeID: response.data.data.employeeID
+          username: response.data.username,
+          id: response.data.id,
+          role: response.data.role,
+          email: response.data.email,
+          firstName: response.data.firstName,
+          lastName: response.data.lastName,
+          employeeID: response.data.employeeID
         };
 
-        localStorage.setItem('authToken', response.data.data.token);
+        localStorage.setItem('authToken', response.data.token);
         localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
         console.log(`Welcome ${userInfo.firstName} ${userInfo.lastName} (${userInfo.role})`);

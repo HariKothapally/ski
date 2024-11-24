@@ -7,13 +7,11 @@ const apiBaseUrl = `${import.meta.env.VITE_API_URL}/api`;
 const initialItemState = {
   ingredientId: "",
   ingredientName: "",
-  unit: "kg", // default unit
+  unit: "kg",
   quantity: 0,
-  unitPrice: 0,
-  totalCost: 0
 };
 
-const PurchasesComponent = () => {
+const Purchases = () => {
   const [purchases, setPurchases] = useState([]);
   const [suppliers, setSuppliers] = useState([]); 
   const [supplierOptions, setSupplierOptions] = useState([]);
@@ -546,4 +544,4 @@ const PurchasesComponent = () => {
   );
 };
 
-export default PurchasesComponent;
+export default Purchases;

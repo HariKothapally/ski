@@ -4,8 +4,7 @@ import mongoose from "mongoose";
 import { randomBytes } from 'crypto';
 import { generateToken, hashPassword, comparePassword } from '../utils/auth.js';
 import { validateEmail, validatePassword, sanitizeInput } from '../utils/validation.js';
-import { AppError } from '../utils/errorHandler.js';
-import { catchAsync } from '../utils/errorHandler.js';
+import { AppError, catchAsync } from '../utils/errorHandler.js';
 
 const validateUserInput = (data, isUpdate = false) => {
   const { username, password, email, firstName, lastName, employeeId } = data;

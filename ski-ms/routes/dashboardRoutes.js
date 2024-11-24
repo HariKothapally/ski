@@ -4,7 +4,7 @@ import {
   getEmployeeAnalytics,
   getOrderAnalytics
 } from '../controllers/dashboardController.js';
-import { protect, restrictTo } from '../middleware/authMiddleware.js';
+import { authenticateToken as protect, authorizeRole as restrictTo } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 

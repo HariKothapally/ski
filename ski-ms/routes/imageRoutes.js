@@ -1,4 +1,4 @@
-import express from "express";
+import express from 'express';
 import {
   uploadImage,
   getImages,
@@ -8,7 +8,7 @@ import {
   analyzeImage
 } from "../controllers/imageController.js";
 import multer from "multer";
-import { protect } from '../middleware/authMiddleware.js';
+import { authenticateToken as protect, authorizeRole as restrictTo } from '../middleware/authMiddleware.js';
 
 // Configure multer with file size limits and file type validation
 const storage = multer.memoryStorage();

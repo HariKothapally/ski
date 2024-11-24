@@ -1,6 +1,5 @@
 import Budget from "../models/budgetModel.js";
-import AppError from "../utils/appError.js";
-import catchAsync from "../utils/catchAsync.js";
+import { AppError, catchAsync } from "../utils/errorHandler.js";
 import { filterObj } from "../utils/filterObj.js";
 
 // Create a new budget

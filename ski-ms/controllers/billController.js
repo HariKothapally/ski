@@ -1,7 +1,6 @@
 import Bill from "../models/billModel.js";
 import Order from "../models/orderModel.js";
-import { AppError } from '../utils/errorHandler.js';
-import { catchAsync } from '../utils/errorHandler.js';
+import { AppError, catchAsync } from '../utils/errorHandler.js';
 import { sanitizeInput } from '../utils/validation.js';
 
 // Create a new bill

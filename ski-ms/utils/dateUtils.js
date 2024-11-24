@@ -6,6 +6,20 @@ export const getEndOfDay = (date = new Date()) => {
   return new Date(date.setHours(23, 59, 59, 999));
 };
 
+export const getStartOfWeek = (date = new Date()) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day;
+  return new Date(d.setDate(diff));
+};
+
+export const getEndOfWeek = (date = new Date()) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + 6;
+  return new Date(d.setDate(diff));
+};
+
 export const getStartOfMonth = (date = new Date()) => {
   return new Date(date.getFullYear(), date.getMonth(), 1);
 };
@@ -38,4 +52,9 @@ export const getDaysBetween = (startDate, endDate) => {
   const end = new Date(endDate);
   const diffTime = Math.abs(end - start);
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
+export const isValidDate = (date) => {
+  const d = new Date(date);
+  return d instanceof Date && !isNaN(d);
 };

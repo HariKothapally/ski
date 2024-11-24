@@ -4,8 +4,7 @@ import Revenue from '../models/revenueModel.js';
 import Ingredient from '../models/ingredientsModel.js';
 import Budget from '../models/budgetModel.js';
 import Menu from '../models/menuModel.js';
-import catchAsync from '../utils/catchAsync.js';
-import AppError from '../utils/appError.js';
+import { AppError, catchAsync } from '../utils/errorHandler.js';
 
 // Get dashboard summary
 export const getDashboardSummary = catchAsync(async (req, res, next) => {

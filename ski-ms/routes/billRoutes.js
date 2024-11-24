@@ -8,7 +8,7 @@ import {
   cancelBill,
   refundBill
 } from "../controllers/billController.js";
-import { protect, restrictTo } from '../middleware/authMiddleware.js';
+import { authenticateToken as protect, authorizeRole as restrictTo } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 

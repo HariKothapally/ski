@@ -1,0 +1,25 @@
+# IDE directories
+.idea/
+.vscode/
+
+# Test directories
+ski-test/
+
+# Environment files
+.env*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Build directories
+dist/
+build/
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

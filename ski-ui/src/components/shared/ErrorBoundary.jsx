@@ -38,7 +38,7 @@ class ErrorBoundary extends React.Component {
             <p>
               We're sorry, but something went wrong. Please try again or contact support if the problem persists.
             </p>
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.MODE === 'development' && this.state.error && (
               <details className="mt-2">
                 <summary>Error Details</summary>
                 <pre className="mt-2" style={{ whiteSpace: 'pre-wrap' }}>

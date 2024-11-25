@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const HRManagerComponent = () => {
+const HRManager = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -181,4 +181,4 @@ const HRManagerComponent = () => {
   );
 };
 
-export default HRManagerComponent;
+export default HRManager;

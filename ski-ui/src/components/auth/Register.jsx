@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Form, Button, Card, Container, Row, Col, InputGroup } from 'react-bootstrap';
 import { FaEye, FaEyeSlash, FaUserPlus } from 'react-icons/fa';
-import useAuth from '../../hooks/useAuth';
+import { toast } from 'react-toastify';
+import { useAuth } from '../../hooks/useAuth';
 
 const Register = () => {
+  const navigate = useNavigate();
   const { loading, register } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
@@ -28,11 +30,28 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
-    await register(formData);
+
+    // Validate password length
+    if (formData.password.length < 8) {
+      toast.error('Password must be at least 8 characters long');
+      return;
+    }
+
+    try {
+      // Remove confirmPassword before sending to API
+      const { confirmPassword, ...registrationData } = formData;
+      await register(registrationData);
+      navigate('/dashboard');
+    } catch (error) {
+      // Error is already handled in useAuth
+      console.error('Registration failed:', error);
+    }
   };
 
   return (

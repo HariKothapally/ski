@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Form, Button, Card, Container, Row, Col, InputGroup } from 'react-bootstrap';
 import { FaEye, FaEyeSlash, FaKey } from 'react-icons/fa';
-import useAuth from '../../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 
 const ResetPassword = () => {
   const { token } = useParams();

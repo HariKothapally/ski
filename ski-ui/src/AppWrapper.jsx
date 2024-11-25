@@ -6,22 +6,12 @@ import Router from './Router.jsx';
 
 const AppWrapper = () => {
   return (
-    <BrowserRouter>
-      <AuthProvider>
+    <AuthProvider>
+      <BrowserRouter>
         <Router />
-        <ToastContainer 
-          position="top-right" 
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-      </AuthProvider>
-    </BrowserRouter>
+        <ToastContainer />
+      </BrowserRouter>
+    </AuthProvider>
   );
 };
 

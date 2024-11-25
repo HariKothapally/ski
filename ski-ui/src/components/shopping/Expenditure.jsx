@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Purchases, Shopping, ShoppedByBill, ShoppingReview } from './';
+import { Routes, Route, NavLink, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { Purchases, Shopping, ShoppedByBill, ShoppingReview } from './index.jsx';
 import NavbarComponent from '../NavbarComponent.jsx';
 
 const Expenditure = () => {

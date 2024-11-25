@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
-const LoginForm = () => {
+const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     login: '',
@@ -188,4 +188,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default Login;

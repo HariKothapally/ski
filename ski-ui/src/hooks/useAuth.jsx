@@ -55,6 +55,62 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const register = useCallback(async (userData) => {
+    if (!userData?.username || !userData?.password || !userData?.email) {
+      throw new Error('Username, password, and email are required');
+    }
+
+    setLoading(true);
+    try {
+      const response = await authApi.create('/register', userData);
+      
+      if (!response?.data) {
+        throw new Error('Invalid response from server');
+      }
+
+      const { token, ...userInfo } = response.data;
+      
+      if (!token) {
+        throw new Error('No authentication token received');
+      }
+
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('userInfo', JSON.stringify(userInfo));
+      
+      setUser(userInfo);
+      toast.success(`Welcome, ${userInfo.firstName}! Your account has been created.`);
+      
+      return userInfo;
+    } catch (error) {
+      console.error('Registration error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Registration failed. Please try again.';
+      toast.error(errorMessage);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const forgotPassword = useCallback(async (email) => {
+    if (!email) {
+      throw new Error('Email is required');
+    }
+
+    setLoading(true);
+    try {
+      await authApi.create('/forgot-password', { email });
+      toast.success('Password reset instructions have been sent to your email.');
+      return true;
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to send reset instructions. Please try again.';
+      toast.error(errorMessage);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const logout = useCallback(() => {
     try {
       localStorage.removeItem('authToken');
@@ -64,23 +120,25 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (error) {
       console.error('Logout error:', error);
-      toast.error('Error during logout');
+      toast.error('Failed to log out. Please try again.');
       return false;
     }
   }, []);
 
-  const value = {
-    user,
-    loading,
-    login,
-    logout,
-    isAuthenticated: !!user,
-    isAdmin: user?.role === 'ADMIN',
-    isManager: ['MANAGER', 'ADMIN'].includes(user?.role),
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider 
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+        register,
+        forgotPassword,
+        isAuthenticated: !!user,
+        isAdmin: user?.role === 'ADMIN',
+        isManager: user?.role === 'MANAGER' || user?.role === 'ADMIN'
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -93,5 +151,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-export default useAuth;

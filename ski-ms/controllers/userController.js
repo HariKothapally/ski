@@ -230,26 +230,31 @@ export const forgotPassword = catchAsync(async (req, res) => {
   }
 
   const user = await User.findOne({ email: email.toLowerCase() });
-
+  
   if (!user) {
-    throw new AppError('No account found with this email address', 404);
+    // For security reasons, we still return success even if user not found
+    return res.json({
+      success: true,
+      message: 'If an account exists with this email, you will receive password reset instructions.'
+    });
   }
 
-  // Generate a password reset token
+  // Generate reset token
   const resetToken = randomBytes(32).toString('hex');
-  const resetTokenExpiry = Date.now() + 3600000; // Token valid for 1 hour
+  const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
 
-  // Save the reset token and expiry
-  user.resetPasswordToken = resetToken;
-  user.resetPasswordExpires = resetTokenExpiry;
+  // Save reset token to user
+  user.resetToken = resetToken;
+  user.resetTokenExpiry = resetTokenExpiry;
   await user.save();
 
-  // TODO: Send email with reset token
-  // For development, return token in response
-  res.status(200).json({
+  // In a production environment, you would send an email here
+  // For development, we'll just return the token
+  res.json({
     success: true,
-    message: 'Password reset instructions sent to your email',
-    resetToken // Remove this in production
+    message: 'Password reset instructions have been sent.',
+    // Only include token in development
+    ...(process.env.NODE_ENV === 'development' && { resetToken })
   });
 });
 
@@ -266,8 +271,8 @@ export const resetPassword = catchAsync(async (req, res) => {
   }
 
   const user = await User.findOne({
-    resetPasswordToken: token,
-    resetPasswordExpires: { $gt: Date.now() }
+    resetToken: token,
+    resetTokenExpiry: { $gt: new Date() }
   });
 
   if (!user) {
@@ -276,8 +281,8 @@ export const resetPassword = catchAsync(async (req, res) => {
 
   // Update password and clear reset token
   user.password = await hashPassword(password);
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpires = undefined;
+  user.resetToken = undefined;
+  user.resetTokenExpiry = undefined;
   user.updated_at = new Date();
   await user.save();
 
